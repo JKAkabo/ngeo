@@ -5,8 +5,6 @@ from django.db import models
 from django.dispatch import receiver
 from djmoney.models.fields import MoneyField
 
-from .validators import validate_quantity_in_sale
-
 
 class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
