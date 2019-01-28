@@ -14,6 +14,7 @@ class Product(models.Model):
 
 
 class Stock(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.OneToOneField(Product, on_delete=models.CASCADE)
     unit_price = models.DecimalField(max_digits=19, decimal_places=2)
     total_stock = models.PositiveIntegerField(default=0, editable=False)
