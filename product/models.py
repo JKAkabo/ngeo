@@ -16,7 +16,8 @@ class Product(models.Model):
 class Stock(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.OneToOneField(Product, on_delete=models.CASCADE)
-    unit_price = models.DecimalField(max_digits=19, decimal_places=2)
+    unit_price = models.DecimalField(
+        default=0, max_digits=19, decimal_places=2)
     total_stock = models.PositiveIntegerField(default=0, editable=False)
     total_stock_value = models.DecimalField(
         default=0, editable=False, max_digits=19, decimal_places=2)
@@ -44,15 +45,25 @@ class Sale(models.Model):
     total_price = models.DecimalField(
         editable=False, max_digits=19, decimal_places=2)
 
-    def clean_quantity(self):
+    def clean(self):
         try:
             if self.quantity > self.product.stock.current_stock:
-                raise Exception()
+                raise Exception
             self.total_price = self.product.stock.unit_price * self.quantity
         except Exception:
-            raise ValidationError(f'''
-                Only {self.product.stock.current_stock} of this product are left
-            ''')
+            if self.product.stock.current_stock == 0:
+                error_message = f'{self.product.name} is out of stock'
+            elif self.product.stock.current_stock == 1:
+                error_message = f'Only {self.product.stock.current_stock} of {self.product.name} is left'
+            else:
+                error_message = f'Only {self.product.stock.current_stock} of {self.product.name} are left'
+            raise ValidationError(error_message)
+
+
+@receiver(models.signals.post_save, sender=Product)
+def add_stock_on_add_product(sender, instance, created, **kwargs):
+    if created:
+        Stock.objects.create(product=instance)
 
 
 @receiver(models.signals.post_save, sender=Sale)

@@ -16,3 +16,18 @@ class LoginForm(forms.Form):
             'placeholder': 'Password',
         }
     ))
+
+
+class StaffRegistrationForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'first_name',
+            'last_name',
+            'username',
+            'password',
+        ]
+
+
+class ConfirmStaffRegistrationForm(forms.Form):
+    username = forms.MultipleChoiceField(choices=(('hello', 'world'), ('jarvis', 'ai')))
